@@ -1,0 +1,252 @@
+/* Created   by https://github.com/rxyhn 
+   Designed  by https://github.com/rxyhn
+   Maintaned by https://github.com/rxyhn
+*/
+
+// Global
+*{
+	all: unset;
+	font-family: "Iosevka Nerd Font";
+}
+
+// Variable Color's
+$black: #0A0200;
+$gray: #4D0A06;
+$red: #F7768E;
+$green: #73DACA;
+$yellow: #EEDCAB;
+$blue: #7AA2F7;
+$magenta: #BB9AF7;
+$cyan: #7DCFFF;
+$foreground: #EA8C55;
+$background: $black;
+
+
+tooltip {
+	background-color: $black;
+	border-radius: 3px;
+	padding: 2px;
+	margin: 2px;
+	opacity: 0.8;
+	color: $foreground;
+}
+
+// EWW BAR
+.eww_bar{
+  background-color: $background;
+  padding: 5px;
+}
+
+// Launcher
+.launcher-icon{
+    color: $red;
+    font-size: 1.6em;
+	border: 2px solid $black;
+	margin-left: -0.5em;
+	border-radius: 3px;
+}
+
+// CPU Meter
+.cpu-usage {
+	font-size: 0.3em;
+	padding: 0px;
+	margin-bottom: 20px;
+	background-color: $gray;
+	border-radius: 6px;
+}
+
+.mem {
+	color: $foreground;
+	margin-bottom: 20px;
+	margin-left: -0.2em;
+}
+
+.memcircle {
+	background-color: $gray;
+}
+
+.high {
+	color: $yellow;
+}
+
+.medium {
+	color: $foreground;
+}
+
+.low {
+	color: $red;
+}
+
+.idle {
+	color: $gray;
+}
+
+// Control Panel
+.control {
+padding: .5rem;
+font-size: 1.6em;
+margin-left: -0.2em;
+background-color: $black;
+border-radius: 5px;
+}
+.bat{
+  font-size: 1.2em;
+  padding-right: .4rem;
+  color: $foreground;
+}
+.charging {
+	font-size: 0.8em;
+	margin-left: -1.3em;
+}
+.bat-percent{
+	font-size: 0.5em;
+	color: $foreground;
+}
+.pprof{
+	font-size: 0.8em;
+	margin-left: -0.4em;
+	color: $foreground;
+}
+.activeprof{
+	color: $yellow;
+}
+.wifi-icon{
+  color: $magenta;
+}
+.signal-strength {
+	font-size: 0.5em;
+	margin-top: -0.55em;
+	margin-left: 0.2em;
+	color: $black;
+	font-weight: bold;
+}
+.bluetooth-icon{
+	font-size: 0.9em;
+	color: $blue;
+	margin-left: -0.2em;
+}
+.brightness-icon{
+  color: $yellow;
+}
+.volume-icon{
+  margin: .2rem 0 .2rem 0;
+  color: $green;
+}
+.mic-icon{
+	color: $green;
+	margin-left: -0.2em;
+}
+scale trough {
+  all: unset;
+  background-color: $gray;
+  border-radius: 5px;
+  min-height: 80px;
+  min-width: 10px;
+  margin: .3rem 0 .3rem 0;
+}
+.resourcebar trough {
+	min-height: 30px;
+	min-width: 2px;
+	margin: 0px;
+	border-radius: 0px;
+	background: transparent;
+}
+.resourcebar highlight {
+	background-color: $foreground;
+}
+
+.bribar trough highlight {
+  background-color: $yellow;
+  border-radius: 5px;
+}
+.volbar trough highlight {
+  background-color: $green;
+  border-radius: 5px;
+}
+
+// Clock
+.time {
+  font-family: IosevkaTerm Nerdfont Mono;
+  font-weight: bolder;
+  font-size: 1.2em;
+  background-color: $black;
+  color: $foreground;
+  border-radius: 5px;
+  padding: .5rem 0 .5rem 0;
+  margin-left: -0.3em;
+}
+
+.time-date {
+	font-size: 0.6em;
+	font-weight: normal;
+}
+
+.updates {
+	font-weight: bold;
+	font-size: 1.4em;
+	margin-bottom: 0.2em;
+	margin-left: -0.5em;
+	color: $green;
+}
+
+.updates-exist {
+	margin-left: -0.1em;
+	color: $foreground;
+}
+
+.updates-kernel {
+	color: $yellow;
+	margin-left: -0.1em;
+}
+
+// Powermenu
+.powermenu {
+  font-size: 1.4em;
+  font-weight: bold;
+  margin-left: -0.3em;
+}
+.button-bspres, .button-reb, .button-lock,
+.button-quit, .button-off{
+  padding: .5rem .2rem .3rem .2rem;
+}
+.button-off{
+	color: $red;
+	margin-left: -0.4em;
+	margin-bottom: 0.3em;
+}
+.button-bspres{
+	color: $green;
+}
+.button-reb{
+  color: $yellow
+}
+.button-quit{
+	color: $magenta;
+	margin-left: 0.4em;
+}
+.button-lock{
+  color: $blue;
+}
+
+// slideouts
+.icon {
+	font-family: "Font Awesome 6 Free";
+	color: $green;
+	background: $background;
+	border-radius: 8px;
+	min-height: 30px;
+	min-width: 30px;
+}
+
+.active {
+	color: $foreground;
+}
+
+.icon:hover {
+	background: $gray;
+}
+
+.slideout {
+	font-family: "Font Awesome 6 Free";
+	background: transparent;
+}

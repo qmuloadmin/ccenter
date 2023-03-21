@@ -1,0 +1,25 @@
+#!/bin/sh
+
+name() {
+nmcli | grep "^wlp" | sed 's/\ connected\ to\ /Connected to /g' | cut -d ':' -f2
+}
+
+togglebt() {
+	[ "$1" = "no" ] && bluetoothctl power on && eww update btpower="yes"
+	[ "$1" = "yes" ] && bluetoothctl power off && eww update btpower="no"
+}
+
+togglewifi() {
+	if [[ $(nmcli radio wifi) = enabled ]]; then
+		nmcli radio wifi off &
+		eww update wifipower="disabled"
+	else
+		nmcli radio wifi on &
+		eww update wifipower="enabled"
+	fi
+}
+
+[ "$1" = "icon" ] && symbol && exit
+[ "$1" = "name" ] && name && exit
+[ "$1" = "bttoogle" ] && togglebt "$2" && exit
+[ "$1" = "togglewifi" ] && togglewifi && exit

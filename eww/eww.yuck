@@ -1,0 +1,348 @@
+;; Created   by https://github.com/rxyhn
+;; Designed  by https://github.com/rxyhn
+;; Maintaned by https://github.com/rxyhn
+
+;; put path to aesthetic bar config files here ;;
+(defvar eww "/usr/bin/eww")
+(defvar ccenter "/home/zach/Projects/src/github.com/qmuloadmin/ccenter/target/debug/ccenter")
+(defvar pprofs "[\"performance\", \"balanced\", \"power-saver\"]")
+(defvar revbat "false")
+(defvar pa-sinks "[}]")
+(defvar lockbar false)
+
+;;ccenter vars are needed for various revealer debounces.
+;; ccenter (control center) is used for external interactions with displayed
+;; things, e.g. audio and the keyboard audio functions
+(defvar ccenter-showside 0)
+(defvar ccenter-volume 0)
+(defvar ccenter-mic 0)
+(defvar ccenter-mute 0)
+(defvar ccenter-bright 0)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;							Widget Section's							 ;;	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Launcher Widgets ;;
+(defwidget launcher []
+  	(button :class "launcher-icon" 
+		   	:onclick "sirula &"
+			""
+			))
+
+(defwidget mem []
+ (box :class "mem" :tooltip "${round(EWW_RAM.used_mem / 1024 / 1024 / 1024, 1)}GB" (circular-progress :value {EWW_RAM.used_mem / EWW_RAM.total_mem * 100} :start-at 50 :thickness 12 :class "memcircle"))
+)
+
+(defwidget cpu []
+  (overlay
+  (box :orientation "h"
+	   :space-evently "true"
+	   :vexpand "false"
+	   :hexpand "false"
+	   :class "cpu-usage"
+	   :spacing 0
+	   (for core in "${EWW_CPU.cores}"
+			(scale :class "resourcebar" :orientation "v" :max 100 :min 0 :value {core.usage} :flipped true :tooltip "${core.usage}% ${core.freq}Mhz")
+			;; (label
+			;;  :class "cpu-core ${core.usage > 80 ? 'high' : core.usage > 40 ? 'medium' : core.usage > 20 ? 'low' : 'idle'}"
+			;;  :text "${core.usage > 80 ? '█████████' : core.usage > 60 ? '██████' : core.usage > 40 ? '████' : core.usage > 20 ? '██' : '█'  }"
+			;;  :tooltip "${core.usage}% ${core.freq}Hz")
+			)
+	   )
+  (eventbox :onclick "hyprctl dispatch exec [float] foot btop")
+  ))
+
+;; Battery Widgets ;;
+(defwidget bat []
+  (eventbox :onhover "${eww} update revbat=true"
+			:onhoverlost "${eww} update revbat=false"
+			(box	:orientation "v"
+					:space-evenly "false"
+					:vexpand: "false"
+					(label	:class "bat${battery-life == '' ? ' charging' : ''}"	
+							:halign "end"
+							:text battery	
+							:tooltip {battery-life ?: "Charging"})
+					(label  :class "bat-percent" :text "${EWW_BATTERY.BAT0.capacity}%")
+					(revealer
+					 :transition "slideup"
+					 :reveal revbat
+					 :duration: "550mx"
+					 (box
+					  :orientation "v"
+					  :spacing 5
+					  :space-evenly "true"
+						  (for prof in pprofs
+							   (button
+								:onclick "scripts/battery prof ${prof}"
+								:tooltip prof
+								:class "pprof${prof == active-prof ? ' activeprof' : ''}" {prof == "performance" ? "" :
+													 prof == "balanced" ? "" : ""})
+						  )))
+					))
+)
+(defpoll battery :interval "30s"	"scripts/battery icon")
+(defpoll battery-life :interval "30s" "upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep 'time to empty' | awk '{print \$4 \" \" \$5}'")
+(defpoll active-prof :interval "60s" "powerprofilesctl get")
+
+;; Wifi Widgets ;;
+(defwidget wifi []
+	(overlay
+				:tooltip "${wifi-name} ${wifisignal}%"
+				(button		:onrightclick "hyprctl dispatch exec [float] 'foot nmtui'"
+							:onclick "scripts/wifi togglewifi"
+							:class "wifi-icon" {wifipower == "enabled" ? "" : ""})
+				(label :text "${wifisignal}" :class "signal-strength" )))
+(defpoll wifi-name :interval "60s" :run-while {wifipower == "enabled" } "scripts/wifi name")
+(defpoll wifipower :interval "60s" "nmcli radio wifi")
+(defpoll wifisignal :interval "120s" :timeout "15s" :run-while {wifipower == "enabled" } "nmcli -f in-use,signal dev wifi list | awk '/\*/{if (NR!=1) {print $2}}'")
+
+(defwidget bluetooth []
+  (box :orientation "v"
+	   :tooltip "bluetooth ${btpower == 'yes' ? 'on' : 'off'}"
+	   (button
+		:onrightclick "blueberry"
+		:onclick "scripts/wifi bttoogle ${btpower}"
+		:class "bluetooth-icon" {btpower == "yes" ? "" : ""})))
+(defpoll btpower :interval "60s" "bluetoothctl show | grep Powered | awk '{print $2}'")
+
+;; Brightness Widgets ;;
+(defwidget bright []
+  (eventbox :onhover "${eww} update bright=true"   
+  			:onhoverlost "${eww} update bright=false"
+  			(box    :orientation "v"  
+			  		:space-evenly "false"  
+					:spacing 2
+			(label :class "brightness-icon" 
+			  	   :text "")
+  			(revealer :transition "slidedown" 
+			  		  :reveal bright
+					  :duration "550ms"
+  			(scale :class "bribar" 
+			  	   :value current-brightness 
+				   :tooltip "Brightness: ${current-brightness}%" 
+				   :onchange "brightnessctl set {}%" 
+				   :orientation "v" 
+				   :max 101 
+				   :min 0))
+ )))
+(defpoll current-brightness :interval "60s" "brightnessctl -m | awk -F, '{print substr($4, 0, length($4)-1)}' | tr -d '%'")
+(defvar bright false)
+
+;; Volume Widgets ;;
+(defwidget micvolume []
+  (box :orientation "v"
+	   :space-evenly "false"
+	   :spacing 2
+	   (button
+		:onclick "${ccenter} micmute"
+		:class "mic-icon" {micmute == "no" ? "" : ""})
+   )
+  )
+(defwidget volume []
+  (eventbox :onhover "${eww} update volume=true" 		
+			:onhoverlost "${eww} update volume=false"
+			(box      :orientation "v" 	  
+					  :space-evenly "false" 
+					  :spacing 2
+					  (button
+					   :onclick "${ccenter} volmute"
+					   :onrightclick "/home/zach/Projects/src/github.com/qmuloadmin/ccenter/target/debug/ccenter update-sinks && eww open pa-slideout"
+					   :class "volume-icon" {mute == "no" ? "" : ""})
+					  (revealer :transition "slidedown" 
+								:reveal volume         
+								:duration "300ms"
+								(scale    :class "volbar" 	  
+										  :value current-volume 
+										  :orientation "v"      
+										  :flipped false 
+										  :tooltip "Volume: ${current-volume}%" 
+										  :max 101 
+										  :min 0 
+										  :onchange "pactl set-sink-volume @DEFAULT_SINK@ {}%" ))
+					  )))
+(defpoll current-volume :interval "60s" "pactl get-sink-volume @DEFAULT_SINK@ | grep Volume | awk '{print $5}' | tr -d '%' ")
+(defvar volume false)
+(defpoll mute :interval "60s" "pactl get-sink-mute @DEFAULT_SINK@ | awk '{print $2}'")
+(defpoll micmute :interval "300s" "pactl get-source-mute @DEFAULT_SOURCE@ | awk '{print $2}'")
+
+(defwidget pa-sink-select []
+  (eventbox :onhoverlost "${eww} close pa-slideout"
+			(box :orientation "h"
+				 :space-evenly: "false"
+				 :hexpand "true"
+				 :class "slideout"
+				 (revealer :transition "slideleft"
+						   :reveal true
+						   :duration "300ms"
+						   (box 
+							(for dev in pa-sinks
+								 (button :class {dev.active ? "icon active" : "icon"}
+										 :tooltip "${dev.desc}"
+										 :onclick "pactl set-default-sink ${dev.name} && /home/zach/Projects/src/github.com/qmuloadmin/ccenter/target/debug/ccenter update-sinks"
+										  "${dev.icon}")
+								 )
+							)
+						   )
+				 )
+			)
+  )
+
+;; Control Panel Widgets ;;	
+(defwidget control []
+	(box :orientation "v" 
+		 :space-evenly "false"
+		 :spacing 5
+		 :class "control"
+(bat)
+(bright)
+(volume)
+(micvolume)
+(wifi)
+(bluetooth)
+))
+
+;; Clock Widgets ;;
+(defwidget time []
+	(box	:orientation "v" 
+			:class "time" 
+			:valign "end"
+			:tooltip date
+	(button	:onclick ""	
+			:class "time-hour" hour)
+	(button	:onclick ""	
+			:class "time-min"  min)
+	))
+(defpoll hour	:interval "30s"	"date '+%H'")
+(defpoll min	:interval "2s"	"date '+%M'")
+(defpoll date :interval "600s" "date")
+
+(defwidget updates []
+  (eventbox
+   :onclick "hyprctl dispatch exec [float] foot \"bash -c \\\"checkupdates && read -p 'Press Enter'\\\"\""
+   :onrightclick "hyprctl dispatch exec [float] foot sudo pacman -- -Syu"
+  (box :orientation "v"
+	   :space-evently "false"
+	   :vexpand "false"
+	   (label
+		:text { update-count > 0 ? "" : "" }
+		:class "updates ${update-count > 0 ? 'updates-exist' : ''} ${ kernel-update =~ 'linux' ? 'updates-kernel' : '' }"
+		:tooltip { update-count > 0 ? "${update-count} Updates" : "Up to date"}
+		))
+  ))
+(defpoll update-count :initial "0" :interval "600s" "checkupdates | wc -l")
+(defpoll kernel-update :timeout "5s" :initial "" :interval "600s" "checkupdates | grep linux")
+
+;; Powermenu Widgets ;;
+(defwidget power []
+	(eventbox	:onhover "${eww} update power=true"	
+				:onhoverlost "${eww} update power=false" 
+	(box		:orientation "v"					
+				:space-evenly "false" 	 
+				:vexpand "false" 
+				:class "powermenu"
+	(revealer	:transition "slideup"				
+				:reveal power			 
+				:duration "550ms"
+	(box		:orientation "v"					
+				:space-evenly "false"
+				(button		:class "button-quit" 				
+				:tooltip "Logout" 		 
+				:onclick "hyprctl dispatch exit" "")
+				(button     :class "button-bspres"
+							:tooltip "Suspend"
+							:onclick "systemctl suspend"
+							"")
+  				(button		:class "button-reb"					
+	  						:tooltip "Reboot"		 
+							:onclick "systemctl reboot"	"")
+				(button		:class "button-lock"				
+							:tooltip "Lock Screen"
+							:onclick "swaylock -l"	"")))
+	(button		:class "button-off"					
+							:tooltip "Shutdown"		 
+							:onclick "shutdown now"	"")
+	)))
+(defvar power false)
+
+;; Top Widgets ;;
+(defwidget top []
+	(box	:orientation "v" 
+			:space-evenly "false" 
+			:valign "start" 
+			(launcher)
+			(control)
+
+))
+
+;; Bottom Widgets ;;
+(defwidget bottom []
+	(box	:orientation "v" 
+			:space-evenly false
+			(cpu)
+			(mem)
+			(updates)
+			(time)
+(power)))
+
+;; End Widgets ;;
+(defwidget end []
+	(box :orientation "v" 
+		 :space-evenly "false" 
+		 :valign "end" 
+		 :spacing 5
+(bottom)))
+
+;; Bar Widgets ;;
+(defwidget bar []
+  (eventbox
+   :onhover "eww update showside=true"
+   :onhoverlost "eww update showside=false"
+   :onrightclick "eww update lockbar=${lockbar=='true' ? 'false' : 'true'}"
+   (revealer
+	:reveal {showside || lockbar}
+	:transition "slideright"
+	:duration "400ms"
+	(box :class "eww_bar" 
+		 :orientation "v" 
+		 :vexpand "false" 
+		 :hexpand "false"
+		 (top)
+		 (end))
+	)
+   )
+  )
+(defvar showside "false")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;							Window Section's							 ;;	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Bar Windows ;;
+(defwindow bar
+  :windowtype "dock"
+  :stacking "overlay"
+	:geometry (geometry :x "0" 
+						:y "0" 
+						:height "100%" 
+						:width "2px")
+	:monitor 0
+	:reserve (struts :distance "2px" 
+					 :side "left")
+	:wm-ignore false
+	:hexpand "false"
+	:vexpand "false"
+(bar))
+
+(defwindow pa-slideout
+  :windowtype "toolbar"
+  :stacking "overlay"
+  :monitor 0
+  :wm-ignore false
+  :hexpand "true"
+  :vexpand "false"
+  :geometry (geometry :x 40
+					  :y 132
+					  :height "40px"
+					  :width "40px")
+  (pa-sink-select)
+  )
