@@ -1,0 +1,54 @@
+
+* {
+    font-family: Iosevka;
+    font-size: 16px;
+}
+
+.app-row {
+    transition: unset;
+    border-radius: 4px;
+    padding: 5px;
+    margin: 0 3px;
+    background-clip: padding-box;
+}
+
+.app-label {
+    margin-left: 10px;
+}
+
+#root-box, .background, #app-list, .overlay-indicator {
+    background: alpha(#0A0200, 0.5);
+	color: #EA8C55;
+}
+scrollbar.vertical slider {
+    background-color: alpha(#EA8C55, 0.50);
+	border: 0px;
+}
+
+#search {
+	background: alpha(#0A0200, 0.5);
+	color: #EA8C55;
+	border: unset;
+    margin: 10px 5px 10px 5px;
+	outline: unset;
+    font-size: 18px;
+    padding: 4px 8px;
+	box-shadow: inset 0px 0px 0px 1px alpha(#4D0A06, 0.5);
+}
+
+.app-row:hover:selected {
+    background-color: alpha(#F7768E, 0.3);
+}
+
+.app-row:hover {
+    background-color: alpha(#F7768E, 0.235);
+}
+
+.app-row:selected {
+    background-color: alpha(#F7768E, 0.25);
+}
+
+
+.app-row:hover.selected {
+    background-color: alpha(#F7768E, 0.3);
+}
