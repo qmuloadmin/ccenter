@@ -147,7 +147,7 @@
 					  :spacing 2
 					  (button
 					   :onclick "${ccenter} volmute"
-					   :onrightclick "/home/zach/Projects/src/github.com/qmuloadmin/ccenter/target/debug/ccenter update-sinks && eww open pa-slideout"
+					   :onrightclick "/home/zach/.bin/ccenter update-sinks && eww open pa-slideout"
 					   :class "volume-icon" {mute == "no" ? "" : ""})
 					  (revealer :transition "slidedown" 
 								:reveal volume         
