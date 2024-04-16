@@ -1,0 +1,14 @@
+markup_highlight = 'foreground="#dc69ff" underline="double"'
+exclusive = true
+icon_size = 32
+anchor_left = false
+anchor_right = false
+anchor_top = false
+anchor_bottom = false
+margin_top = -475
+margin_bottom = 0
+margin_left = 0
+margin_right = 0
+width = 600
+height = 250
+command_prefix = ":"
