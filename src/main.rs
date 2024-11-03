@@ -124,7 +124,7 @@ async fn vol_up() -> CmdResult {
 	run_cmd!(eww update showside="true")?;
 	run_cmd!(eww update volume="true")?;
 	run_cmd!(pactl set-sink-volume @DEFAULT_SINK@ +5%)?;
-	run_cmd!(pactl play-sample bell-terminal)?;
+	run_cmd!(pactl play-sample water_drop)?;
 	let volume = run_fun!(pactl get-sink-volume @DEFAULT_SINK@ | grep Volume | awk "{print $5}" | tr -d "%")?;
 	run_cmd!(eww update current-volume=$volume)?;
 	debounce(&[("volume", "false"), ("showside", "false")]).await
@@ -134,7 +134,7 @@ async fn vol_dn() -> CmdResult {
 	run_cmd!(eww update showside="true")?;
 	run_cmd!(eww update volume="true")?;
 	run_cmd!(pactl set-sink-volume @DEFAULT_SINK@ -5%)?;
-	run_cmd!(pactl play-sample bell-terminal)?;
+	run_cmd!(pactl play-sample water_drop)?;
 	let volume = run_fun!(pactl get-sink-volume @DEFAULT_SINK@ | grep Volume | awk "{print $5}" | tr -d "%")?;
 	run_cmd!(eww update current-volume=$volume)?;
 	debounce(&[("volume", "false"), ("showside", "false")]).await?;

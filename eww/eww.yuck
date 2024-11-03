@@ -59,11 +59,12 @@
 			(box	:orientation "v"
 					:space-evenly "false"
 					:vexpand: "false"
+					:tooltip "${EWW_BATTERY.BAT1.capacity}% ${EWW_BATTERY.BAT1.status}"
 					(label	:class "bat${battery-life == '' ? ' charging' : ''}"	
 							:halign "end"
 							:text battery	
 							:tooltip {battery-life ?: "Charging"})
-					(label  :class "bat-percent" :text "${EWW_BATTERY.BAT0.capacity}%")
+					(label  :class "bat-percent" :text "${EWW_BATTERY.BAT1.status == 'Discharging' ? battery-life : '${EWW_BATTERY.BAT1.capacity}%'}")
 					(revealer
 					 :transition "slideup"
 					 :reveal revbat
@@ -82,7 +83,7 @@
 					))
 )
 (defpoll battery :interval "30s"	"scripts/battery icon")
-(defpoll battery-life :interval "30s" "upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep 'time to empty' | awk '{print \$4 \" \" \$5}'")
+(defpoll battery-life :interval "30s" "upower -i /org/freedesktop/UPower/devices/battery_BAT1 | grep 'time to empty' | awk '{print \$4 substr(\$5, 1, 1)}'")
 (defpoll active-prof :interval "60s" "powerprofilesctl get")
 
 ;; Wifi Widgets ;;
